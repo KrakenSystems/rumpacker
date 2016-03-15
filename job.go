@@ -1,4 +1,4 @@
-package main
+package rumpacker
 
 import (
 	"fmt"
@@ -35,15 +35,18 @@ type Job struct {
 	imageID    string
 	imageState string
 
+	kernelID string
+
 	state JobStatus
 	Done  chan int
 }
 
-func NewJob(instance string, volume string) *Job {
+func NewJob(instance string, volume string, kernelID string) *Job {
 	return &Job{
 		service:  ec2.New(session.New(), &aws.Config{Region: aws.String("us-east-1")}),
 		volume:   volume,
 		instance: instance,
+		kernelID: kernelID,
 		Done:     make(chan int),
 	}
 }

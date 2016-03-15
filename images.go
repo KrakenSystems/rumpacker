@@ -1,4 +1,4 @@
-package main
+package rumpacker
 
 import (
 	"fmt"
@@ -122,7 +122,7 @@ func (job *Job) RegisterImage() {
 		},
 		Description:        aws.String("String"),
 		DryRun:             aws.Bool(false),
-		KernelId:           aws.String("aki-919dcaf8"),
+		KernelId:           aws.String(job.kernelID),
 		RootDeviceName:     aws.String("/dev/sda1"),
 		VirtualizationType: aws.String("paravirtual"),
 	}
