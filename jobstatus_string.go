@@ -4,9 +4,9 @@ package rumpacker
 
 import "fmt"
 
-const _JobStatus_name = "InitialisedDetachingSnapshottingCreatingImageRegisteringImageAttachingDone"
+const _JobStatus_name = "InitialisedDetachingSnapshottingCreatingImageRegisteringImageAttachingDoneErrored"
 
-var _JobStatus_index = [...]uint8{0, 11, 20, 32, 45, 61, 70, 74}
+var _JobStatus_index = [...]uint8{0, 11, 20, 32, 45, 61, 70, 74, 81}
 
 func (i JobStatus) String() string {
 	if i < 0 || i >= JobStatus(len(_JobStatus_index)-1) {

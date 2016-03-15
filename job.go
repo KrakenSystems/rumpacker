@@ -19,6 +19,7 @@ const (
 	RegisteringImage
 	Attaching
 	Done
+	Errored
 )
 
 type Job struct {
