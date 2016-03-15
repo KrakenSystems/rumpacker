@@ -7,19 +7,29 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func (job *Job) MakeSnapshot() {
+func (job *Job) MakeImage() {
 	state := job.GetVolumeState()
 	if state != "detached" {
-		fmt.Printf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s\n", state, job.state.String())
+		fmt.Printf("ERROR volume not detached! Cannot image! Volume state: %s, Job state: %s\n", state, job.state.String())
 		return
 	}
 
-	job.state = Snapshotting
+	if job.snapshotID == "" {
+		fmt.Println("ERROR no snapshot defined!")
+		return
+	}
 
-	params := &ec2.CreateSnapshotInput{
-		VolumeId:    aws.String(job.volume), // Required
-		Description: aws.String("some description lol"),
-		DryRun:      aws.Bool(false),
+	if job.snapshotState != "completed" {
+		fmt.Println("ERROR no snapshot complete!")
+		return
+	}
+
+	job.state = CreatingImage
+
+	params := &ec2.CreateImageInput{
+		VolumeId:   aws.String(job.volume),
+		SnapshotId: aws.String(job.snapshot),
+		DryRun:     aws.Bool(false),
 	}
 	resp, err := job.service.CreateSnapshot(params)
 
@@ -35,19 +45,19 @@ func (job *Job) MakeSnapshot() {
 	fmt.Println("    > Snapshot ID: ", job.snapshotID)
 }
 
-func (job *Job) CheckSnapshotState() string {
-	if job.snapshotID == "" {
-		fmt.Println("ERROR no snapshot defined!")
+func (job *Job) CheckImageState() string {
+	if job.imageID == "" {
+		fmt.Println("ERROR no image defined!")
 		return ""
 	}
 
-	params := &ec2.DescribeSnapshotsInput{
+	params := &ec2.DescribeImagesInput{
 		DryRun: aws.Bool(false),
-		SnapshotIds: []*string{
-			aws.String(job.snapshotID), // Required
+		ImageIds: []*string{
+			aws.String(job.imageID),
 		},
 	}
-	resp, err := job.service.DescribeSnapshots(params)
+	resp, err := job.service.DescribeImages(params)
 
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and
@@ -56,13 +66,13 @@ func (job *Job) CheckSnapshotState() string {
 		return ""
 	}
 
-	state := *resp.Snapshots[0].State
-	if state == job.snapshotState {
+	state := *resp.Images[0].State
+	if state == job.imageState {
 		return state
 	}
 
-	job.snapshotState = state
-	fmt.Printf("Snapshot in state: %s\n", state)
+	job.imageState = state
+	fmt.Printf("  > Image in state: %s\n", state)
 
 	return state
 }

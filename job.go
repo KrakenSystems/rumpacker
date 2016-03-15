@@ -30,6 +30,9 @@ type Job struct {
 	snapshotID    string
 	snapshotState string
 
+	imageID    string
+	imageState string
+
 	state JobStatus
 	Done  chan int
 }

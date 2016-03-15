@@ -46,6 +46,11 @@ func (job *Job) checkState() {
 
 	case Snapshotting:
 		if job.CheckSnapshotState() == "completed" {
+			job.MakeImage()
+		}
+
+	case CreatingImage:
+		if job.CheckImageState() == "available" {
 			job.AttachVolume()
 		}
 
