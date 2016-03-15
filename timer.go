@@ -17,6 +17,7 @@ func (job *Job) Run() {
 			job.checkState()
 
 			if job.state == Done {
+				fmt.Println("*** Job done! ***")
 				break
 			}
 		}
@@ -46,7 +47,7 @@ func (job *Job) checkState() {
 
 	case Snapshotting:
 		if job.CheckSnapshotState() == "completed" {
-			job.MakeImage()
+			job.RegisterImage()
 		}
 
 	case CreatingImage:

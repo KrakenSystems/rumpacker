@@ -32,7 +32,7 @@ func (job *Job) MakeSnapshot() {
 
 	job.snapshotID = *resp.SnapshotId
 
-	fmt.Println("    > Snapshot ID: ", job.snapshotID)
+	fmt.Println("\t> Snapshot ID: ", job.snapshotID)
 }
 
 func (job *Job) CheckSnapshotState() string {
@@ -62,7 +62,7 @@ func (job *Job) CheckSnapshotState() string {
 	}
 
 	job.snapshotState = state
-	fmt.Printf("Snapshot in state: %s\n", state)
+	fmt.Printf("\t> Snapshot in state: %s\n", state)
 
 	return state
 }

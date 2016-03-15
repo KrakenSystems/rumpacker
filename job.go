@@ -16,6 +16,7 @@ const (
 	Detaching
 	Snapshotting
 	CreatingImage
+	RegisteringImage
 	Attaching
 	Done
 )
@@ -30,6 +31,7 @@ type Job struct {
 	snapshotID    string
 	snapshotState string
 
+	imageName  string
 	imageID    string
 	imageState string
 

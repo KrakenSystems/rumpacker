@@ -14,7 +14,7 @@ func (job *Job) CheckVolumeState() string {
 	}
 
 	job.volumeState = state
-	fmt.Printf("Volume in state: %s\n", state)
+	fmt.Printf("\t> Volume in state: %s\n", state)
 
 	return state
 }
@@ -93,7 +93,7 @@ func (job *Job) DetachVolume() {
 		DryRun:   aws.Bool(false),
 		Force:    aws.Bool(false),
 	}
-	fmt.Printf("  > Detaching %s...\n", job.volume)
+	fmt.Printf("\t> Detaching %s...\n", job.volume)
 
 	_, err := job.service.DetachVolume(params)
 
@@ -120,7 +120,7 @@ func (job *Job) AttachVolume() {
 		VolumeId:   aws.String(job.volume),   // Required
 		DryRun:     aws.Bool(false),
 	}
-	fmt.Printf("  > Attaching %s...\n", job.volume)
+	fmt.Printf("\t> Attaching %s...\n", job.volume)
 
 	_, err := job.service.AttachVolume(params)
 
