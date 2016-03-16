@@ -3,6 +3,8 @@ package rumpacker
 import (
 	"fmt"
 	"time"
+
+	. "github.com/KrakenSystems/ascalia-utils"
 )
 
 func (job *Job) Run() {

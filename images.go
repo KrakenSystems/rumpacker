@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	. "github.com/KrakenSystems/ascalia-utils"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+
+	_ "github.com/KrakenSystems/ascalia-utils"
 )
 
 func (job *Job) MakeImage() {

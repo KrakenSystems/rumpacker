@@ -5,6 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+
+	. "github.com/KrakenSystems/ascalia-utils"
 )
 
 func (job *Job) CheckVolumeState() string {

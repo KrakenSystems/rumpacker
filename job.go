@@ -6,20 +6,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-)
 
-type JobStatus int
-
-//go:generate stringer -type=JobStatus
-const (
-	Initialised JobStatus = iota
-	Detaching
-	Snapshotting
-	CreatingImage
-	RegisteringImage
-	Attaching
-	Done
-	Errored
+	. "github.com/KrakenSystems/ascalia-utils"
 )
 
 type Job struct {
