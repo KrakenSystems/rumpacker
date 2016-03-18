@@ -17,22 +17,23 @@ func (job *Job) MakeImage() bool {
 
 	state := job.GetVolumeState()
 	if state != "detached" {
-		fmt.Printf("ERROR volume not detached! Cannot image! Volume state: %s, Job state: %s\n", state, job.state.String())
+		job.log <- fmt.Sprintf("ERROR volume not detached! Cannot image! Volume state: %s, Job state: %s\n", state, job.state.String())
 		return false
 	}
 	job.state = AMI_CreatingImage
 
 	if job.snapshotID == "" {
-		fmt.Println("ERROR no snapshot defined!")
+		job.log <- "ERROR no snapshot defined!"
 		return false
 	}
 
 	if job.snapshotState != "completed" {
-		fmt.Println("ERROR no snapshot complete!")
+		job.log <- "ERROR no snapshot complete!"
 		return false
 	}
 
 	job.imageName = fmt.Sprintf("Image %d", time.Now().Unix())
+	job.log <- fmt.Sprintf("AWS image name: %s", job.imageName)
 
 	params := &ec2.CreateImageInput{
 		InstanceId: aws.String(job.instance),  // Required
@@ -57,19 +58,19 @@ func (job *Job) MakeImage() bool {
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
-		fmt.Println(err.Error())
+		job.log <- err.Error()
 		return false
 	}
 
 	job.imageID = *resp.ImageId
 
-	fmt.Println("\t> Image ID: ", job.imageID)
+	job.log <- fmt.Sprintf("> Image ID: %s", job.imageID)
 	return true
 }
 
 func (job *Job) CheckImageState() string {
 	if job.imageID == "" {
-		fmt.Println("ERROR no image defined!")
+		job.log <- "ERROR no image defined!"
 		return ""
 	}
 
@@ -84,7 +85,7 @@ func (job *Job) CheckImageState() string {
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
-		fmt.Println(err.Error())
+		job.log <- err.Error()
 		return ""
 	}
 
@@ -94,7 +95,7 @@ func (job *Job) CheckImageState() string {
 	}
 
 	job.imageState = state
-	fmt.Printf("\t> Image in state: %s\n", state)
+	job.log <- fmt.Sprintf("> Image in state: %s\n", state)
 
 	return state
 }
@@ -104,12 +105,12 @@ func (job *Job) RegisterImage() bool {
 	job.state = AMI_RegisteringImage
 
 	if job.snapshotID == "" {
-		fmt.Println("ERROR no snapshot defined!")
+		job.log <- "ERROR no snapshot defined!"
 		return false
 	}
 
 	if job.snapshotState != "completed" {
-		fmt.Println("ERROR no snapshot complete!")
+		job.log <- "ERROR no snapshot complete!"
 		return false
 	}
 
@@ -140,12 +141,12 @@ func (job *Job) RegisterImage() bool {
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
-		fmt.Println(err.Error())
+		job.log <- err.Error()
 		return false
 	}
 
 	job.imageID = *resp.ImageId
 
-	fmt.Println("\t> Image ID: ", job.imageID)
+	job.log <- fmt.Sprintf("\t> Image ID: %s", job.imageID)
 	return true
 }

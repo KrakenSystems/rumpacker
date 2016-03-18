@@ -19,7 +19,7 @@ func (job *Job) Run() {
 			job.checkState()
 
 			if job.state == Done {
-				fmt.Println("*** Job done! ***")
+				job.log <- "*** Job done! ***"
 				break
 			}
 		}
@@ -34,7 +34,7 @@ func (job *Job) checkState() {
 
 	if prevState != job.state {
 		prevState = job.state
-		fmt.Printf("Job state: %s\n", job.state.String())
+		job.log <- fmt.Sprintf("Job state: %s\n", job.state.String())
 	}
 
 	success := true

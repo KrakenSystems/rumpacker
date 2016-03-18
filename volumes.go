@@ -16,7 +16,7 @@ func (job *Job) CheckVolumeState() string {
 	}
 
 	job.volumeState = state
-	fmt.Printf("\t> Volume in state: %s\n", state)
+	job.log <- fmt.Sprintf("\t> Volume in state: %s\n", state)
 
 	return state
 }
@@ -32,13 +32,12 @@ func (job *Job) GetVolumeState() string {
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
-		fmt.Println(err.Error())
+		job.log <- err.Error()
 		return ""
 	}
 
 	if len(resp.Volumes) != 1 {
-		fmt.Println("ERROR: wrong number of returned volumes!")
-		fmt.Println(resp)
+		job.log <- "ERROR: wrong number of returned volumes!"
 		return ""
 	}
 
@@ -47,8 +46,7 @@ func (job *Job) GetVolumeState() string {
 	}
 
 	if len(resp.Volumes[0].Attachments) > 1 {
-		fmt.Println("ERROR: multiple attachments!")
-		fmt.Println(resp)
+		job.log <- "ERROR: multiple attachments!"
 		return "multiple"
 	}
 
@@ -79,7 +77,7 @@ func (job *Job) ListVolumes() {
 
 func (job *Job) DetachVolume() bool {
 	if job.state != Initialised {
-		fmt.Printf("ERROR job not in state initialised! Cannot detach! State: %s\n", job.state.String())
+		job.log <- fmt.Sprintf("ERROR job not in state initialised! Cannot detach! State: %s\n", job.state.String())
 		return false
 	}
 
@@ -96,14 +94,14 @@ func (job *Job) DetachVolume() bool {
 		DryRun:   aws.Bool(false),
 		Force:    aws.Bool(false),
 	}
-	fmt.Printf("\t> Detaching %s...\n", job.volume)
+	job.log <- fmt.Sprintf("\t> Detaching %s...\n", job.volume)
 
 	_, err := job.service.DetachVolume(params)
 
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
-		fmt.Println(err.Error())
+		job.log <- err.Error()
 		return false
 	}
 

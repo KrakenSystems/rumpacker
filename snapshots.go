@@ -14,7 +14,7 @@ func (job *Job) MakeSnapshot() bool {
 
 	state := job.GetVolumeState()
 	if state != "detached" {
-		fmt.Printf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s\n", state, job.state.String())
+		job.log <- fmt.Sprintf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s\n", state, job.state.String())
 		return false
 	}
 	job.state = AMI_Snapshotting
@@ -29,19 +29,19 @@ func (job *Job) MakeSnapshot() bool {
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
-		fmt.Println(err.Error())
+		job.log <- err.Error()
 		return false
 	}
 
 	job.snapshotID = *resp.SnapshotId
 
-	fmt.Println("\t> Snapshot ID: ", job.snapshotID)
+	job.log <- fmt.Sprintf("\t> Snapshot ID: %s", job.snapshotID)
 	return true
 }
 
 func (job *Job) CheckSnapshotState() string {
 	if job.snapshotID == "" {
-		fmt.Println("ERROR no snapshot defined!")
+		job.log <- "ERROR no snapshot defined!"
 		return ""
 	}
 
@@ -56,7 +56,7 @@ func (job *Job) CheckSnapshotState() string {
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
-		fmt.Println(err.Error())
+		job.log <- err.Error()
 		return ""
 	}
 
@@ -66,7 +66,7 @@ func (job *Job) CheckSnapshotState() string {
 	}
 
 	job.snapshotState = state
-	fmt.Printf("\t> Snapshot in state: %s\n", state)
+	job.log <- fmt.Sprintf("\t> Snapshot in state: %s\n", state)
 
 	return state
 }
