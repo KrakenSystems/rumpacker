@@ -77,17 +77,18 @@ func (job *Job) ListVolumes() {
 	}
 }
 
-func (job *Job) DetachVolume() {
+func (job *Job) DetachVolume() bool {
+	job.dbJob.SetStatus(AMI_Detaching)
+	job.state = AMI_Detaching
+
 	if job.state != Initialised {
 		fmt.Printf("ERROR job not in state initialised! Cannot detach! State: %s\n", job.state.String())
-		return
+		return false
 	}
-
-	job.state = AMI_Detaching
 
 	state := job.GetVolumeState()
 	if state == "detached" {
-		return
+		return true
 	}
 
 	params := &ec2.DetachVolumeInput{
@@ -103,18 +104,21 @@ func (job *Job) DetachVolume() {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
 		fmt.Println(err.Error())
-		return
+		return false
 	}
+
+	return true
 }
 
-func (job *Job) AttachVolume() {
+func (job *Job) AttachVolume() bool {
+	job.dbJob.SetStatus(AMI_Attaching)
+	job.state = AMI_Attaching
+
 	state := job.GetVolumeState()
 	if state != "detached" {
 		fmt.Printf("ERROR volume not detached! Cannot attach! Volume state: %s, Job state: %s\n", state, job.state.String())
-		return
+		return false
 	}
-
-	job.state = AMI_Attaching
 
 	params := &ec2.AttachVolumeInput{
 		Device:     aws.String("/dev/sdf"),   // Required
@@ -130,6 +134,8 @@ func (job *Job) AttachVolume() {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
 		fmt.Println(err.Error())
-		return
+		return false
 	}
+
+	return true
 }

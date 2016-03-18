@@ -11,21 +11,24 @@ import (
 	_ "github.com/KrakenSystems/ascalia-utils"
 )
 
-func (job *Job) MakeImage() {
+func (job *Job) MakeImage() bool {
+
+	job.dbJob.SetStatus(AMI_CreatingImage)
+
 	state := job.GetVolumeState()
 	if state != "detached" {
 		fmt.Printf("ERROR volume not detached! Cannot image! Volume state: %s, Job state: %s\n", state, job.state.String())
-		return
+		return false
 	}
 
 	if job.snapshotID == "" {
 		fmt.Println("ERROR no snapshot defined!")
-		return
+		return false
 	}
 
 	if job.snapshotState != "completed" {
 		fmt.Println("ERROR no snapshot complete!")
-		return
+		return false
 	}
 
 	job.state = AMI_CreatingImage
@@ -56,12 +59,13 @@ func (job *Job) MakeImage() {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
 		fmt.Println(err.Error())
-		return
+		return false
 	}
 
 	job.imageID = *resp.ImageId
 
 	fmt.Println("\t> Image ID: ", job.imageID)
+	return true
 }
 
 func (job *Job) CheckImageState() string {
@@ -96,15 +100,17 @@ func (job *Job) CheckImageState() string {
 	return state
 }
 
-func (job *Job) RegisterImage() {
+func (job *Job) RegisterImage() bool {
+	job.dbJob.SetStatus(AMI_RegisteringImage)
+
 	if job.snapshotID == "" {
 		fmt.Println("ERROR no snapshot defined!")
-		return
+		return false
 	}
 
 	if job.snapshotState != "completed" {
 		fmt.Println("ERROR no snapshot complete!")
-		return
+		return false
 	}
 
 	job.imageName = fmt.Sprintf("Image %d", time.Now().Unix())
@@ -137,10 +143,11 @@ func (job *Job) RegisterImage() {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
 		fmt.Println(err.Error())
-		return
+		return false
 	}
 
 	job.imageID = *resp.ImageId
 
 	fmt.Println("\t> Image ID: ", job.imageID)
+	return true
 }

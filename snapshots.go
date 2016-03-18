@@ -9,14 +9,15 @@ import (
 	. "github.com/KrakenSystems/ascalia-utils"
 )
 
-func (job *Job) MakeSnapshot() {
+func (job *Job) MakeSnapshot() bool {
+	job.dbJob.SetStatus(AMI_Snapshotting)
+	job.state = AMI_Snapshotting
+
 	state := job.GetVolumeState()
 	if state != "detached" {
 		fmt.Printf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s\n", state, job.state.String())
-		return
+		return false
 	}
-
-	job.state = AMI_Snapshotting
 
 	params := &ec2.CreateSnapshotInput{
 		VolumeId:    aws.String(job.volume), // Required
@@ -29,12 +30,13 @@ func (job *Job) MakeSnapshot() {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
 		fmt.Println(err.Error())
-		return
+		return false
 	}
 
 	job.snapshotID = *resp.SnapshotId
 
 	fmt.Println("\t> Snapshot ID: ", job.snapshotID)
+	return true
 }
 
 func (job *Job) CheckSnapshotState() string {

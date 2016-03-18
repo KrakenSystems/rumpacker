@@ -37,29 +37,36 @@ func (job *Job) checkState() {
 		fmt.Printf("Job state: %s\n", job.state.String())
 	}
 
+	success := true
+
 	switch job.state {
 
 	case Initialised:
-		job.DetachVolume()
+		success = job.DetachVolume()
 
 	case AMI_Detaching:
 		if job.CheckVolumeState() == "detached" {
-			job.MakeSnapshot()
+			success = job.MakeSnapshot()
 		}
 
 	case AMI_Snapshotting:
 		if job.CheckSnapshotState() == "completed" {
-			job.RegisterImage()
+			success = job.RegisterImage()
 		}
 
 	case AMI_CreatingImage:
 		if job.CheckImageState() == "available" {
-			job.AttachVolume()
+			success = job.AttachVolume()
 		}
 
 	case AMI_Attaching:
 		if job.CheckVolumeState() == "attached" {
 			job.state = Done
 		}
+	}
+
+	if !success {
+		job.state = Done
+		job.dbJob.SetStatus(Errored)
 	}
 }

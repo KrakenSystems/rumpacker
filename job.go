@@ -28,15 +28,18 @@ type Job struct {
 
 	state JobStatus
 	Done  chan int
+
+	dbJob *DatabaseJob
 }
 
-func NewJob(instance string, volume string, kernelID string) *Job {
+func NewJob(instance string, volume string, kernelID string, dbJob *DatabaseJob) *Job {
 	return &Job{
 		service:  ec2.New(session.New(), &aws.Config{Region: aws.String("us-east-1")}),
 		volume:   volume,
 		instance: instance,
 		kernelID: kernelID,
 		Done:     make(chan int),
+		dbJob:    dbJob,
 	}
 }
 
