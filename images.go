@@ -17,7 +17,7 @@ func (job *Job) MakeImage() bool {
 
 	state := job.GetVolumeState()
 	if state != "detached" {
-		job.log <- fmt.Sprintf("ERROR volume not detached! Cannot image! Volume state: %s, Job state: %s\n", state, job.state.String())
+		job.log <- fmt.Sprintf("ERROR volume not detached! Cannot image! Volume state: %s, Job state: %s", state, job.state.String())
 		return false
 	}
 	job.state = AMI_CreatingImage
@@ -95,7 +95,7 @@ func (job *Job) CheckImageState() string {
 	}
 
 	job.imageState = state
-	job.log <- fmt.Sprintf("> Image in state: %s\n", state)
+	job.log <- fmt.Sprintf("> Image in state: %s", state)
 
 	return state
 }

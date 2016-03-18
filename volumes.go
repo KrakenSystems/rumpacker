@@ -16,7 +16,7 @@ func (job *Job) CheckVolumeState() string {
 	}
 
 	job.volumeState = state
-	job.log <- fmt.Sprintf("\t> Volume in state: %s\n", state)
+	job.log <- fmt.Sprintf("\t> Volume in state: %s", state)
 
 	return state
 }
@@ -77,7 +77,7 @@ func (job *Job) ListVolumes() {
 
 func (job *Job) DetachVolume() bool {
 	if job.state != Initialised {
-		job.log <- fmt.Sprintf("ERROR job not in state initialised! Cannot detach! State: %s\n", job.state.String())
+		job.log <- fmt.Sprintf("ERROR job not in state initialised! Cannot detach! State: %s", job.state.String())
 		return false
 	}
 
@@ -94,7 +94,7 @@ func (job *Job) DetachVolume() bool {
 		DryRun:   aws.Bool(false),
 		Force:    aws.Bool(false),
 	}
-	job.log <- fmt.Sprintf("\t> Detaching %s...\n", job.volume)
+	job.log <- fmt.Sprintf("\t> Detaching %s...", job.volume)
 
 	_, err := job.service.DetachVolume(params)
 
@@ -114,7 +114,7 @@ func (job *Job) AttachVolume() bool {
 
 	state := job.GetVolumeState()
 	if state != "detached" {
-		fmt.Printf("ERROR volume not detached! Cannot attach! Volume state: %s, Job state: %s\n", state, job.state.String())
+		job.log <- fmt.Sprintf("ERROR volume not detached! Cannot attach! Volume state: %s, Job state: %s", state, job.state.String())
 		return false
 	}
 
@@ -124,7 +124,7 @@ func (job *Job) AttachVolume() bool {
 		VolumeId:   aws.String(job.volume),   // Required
 		DryRun:     aws.Bool(false),
 	}
-	fmt.Printf("\t> Attaching %s...\n", job.volume)
+	job.log <- fmt.Sprintf("\t> Attaching %s...", job.volume)
 
 	_, err := job.service.AttachVolume(params)
 

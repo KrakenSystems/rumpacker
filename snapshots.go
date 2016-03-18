@@ -14,7 +14,7 @@ func (job *Job) MakeSnapshot() bool {
 
 	state := job.GetVolumeState()
 	if state != "detached" {
-		job.log <- fmt.Sprintf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s\n", state, job.state.String())
+		job.log <- fmt.Sprintf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s", state, job.state.String())
 		return false
 	}
 	job.state = AMI_Snapshotting
@@ -66,7 +66,7 @@ func (job *Job) CheckSnapshotState() string {
 	}
 
 	job.snapshotState = state
-	job.log <- fmt.Sprintf("\t> Snapshot in state: %s\n", state)
+	job.log <- fmt.Sprintf("\t> Snapshot in state: %s", state)
 
 	return state
 }
