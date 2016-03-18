@@ -20,6 +20,7 @@ func (job *Job) MakeImage() bool {
 		fmt.Printf("ERROR volume not detached! Cannot image! Volume state: %s, Job state: %s\n", state, job.state.String())
 		return false
 	}
+	job.state = AMI_CreatingImage
 
 	if job.snapshotID == "" {
 		fmt.Println("ERROR no snapshot defined!")
@@ -30,8 +31,6 @@ func (job *Job) MakeImage() bool {
 		fmt.Println("ERROR no snapshot complete!")
 		return false
 	}
-
-	job.state = AMI_CreatingImage
 
 	job.imageName = fmt.Sprintf("Image %d", time.Now().Unix())
 
@@ -102,6 +101,7 @@ func (job *Job) CheckImageState() string {
 
 func (job *Job) RegisterImage() bool {
 	job.dbJob.SetStatus(AMI_RegisteringImage)
+	job.state = AMI_RegisteringImage
 
 	if job.snapshotID == "" {
 		fmt.Println("ERROR no snapshot defined!")
@@ -136,8 +136,6 @@ func (job *Job) RegisterImage() bool {
 		VirtualizationType: aws.String("paravirtual"),
 	}
 	resp, err := job.service.RegisterImage(params)
-
-	job.state = AMI_CreatingImage
 
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and

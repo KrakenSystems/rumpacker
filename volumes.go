@@ -78,13 +78,13 @@ func (job *Job) ListVolumes() {
 }
 
 func (job *Job) DetachVolume() bool {
-	job.dbJob.SetStatus(AMI_Detaching)
-	job.state = AMI_Detaching
-
 	if job.state != Initialised {
 		fmt.Printf("ERROR job not in state initialised! Cannot detach! State: %s\n", job.state.String())
 		return false
 	}
+
+	job.dbJob.SetStatus(AMI_Detaching)
+	job.state = AMI_Detaching
 
 	state := job.GetVolumeState()
 	if state == "detached" {

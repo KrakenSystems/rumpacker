@@ -11,13 +11,13 @@ import (
 
 func (job *Job) MakeSnapshot() bool {
 	job.dbJob.SetStatus(AMI_Snapshotting)
-	job.state = AMI_Snapshotting
 
 	state := job.GetVolumeState()
 	if state != "detached" {
 		fmt.Printf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s\n", state, job.state.String())
 		return false
 	}
+	job.state = AMI_Snapshotting
 
 	params := &ec2.CreateSnapshotInput{
 		VolumeId:    aws.String(job.volume), // Required
