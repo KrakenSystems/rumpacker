@@ -59,6 +59,9 @@ func (job *Job) checkState() {
 			success = job.AttachVolume()
 		}
 
+	case ISOPrepareAMIVolume:
+		success = job.AttachVolume()
+
 	case AMI_Attaching:
 		if job.CheckVolumeState() == "attached" {
 			job.state = Done
