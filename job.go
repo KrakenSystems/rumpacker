@@ -48,3 +48,7 @@ func NewJob(instance string, volume string, kernelID string, dbJob *DatabaseJob,
 func (job *Job) GetState() {
 	fmt.Printf("Job status: %s\n", job.state.String())
 }
+
+func (job *Job) GetImageID() string {
+	return job.imageID
+}
