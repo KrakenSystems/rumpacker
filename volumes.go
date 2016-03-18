@@ -83,7 +83,7 @@ func (job *Job) DetachVolume() {
 		return
 	}
 
-	job.state = Detaching
+	job.state = AMI_Detaching
 
 	state := job.GetVolumeState()
 	if state == "detached" {
@@ -114,7 +114,7 @@ func (job *Job) AttachVolume() {
 		return
 	}
 
-	job.state = Attaching
+	job.state = AMI_Attaching
 
 	params := &ec2.AttachVolumeInput{
 		Device:     aws.String("/dev/sdf"),   // Required

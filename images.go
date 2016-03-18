@@ -28,7 +28,7 @@ func (job *Job) MakeImage() {
 		return
 	}
 
-	job.state = CreatingImage
+	job.state = AMI_CreatingImage
 
 	job.imageName = fmt.Sprintf("Image %d", time.Now().Unix())
 
@@ -131,7 +131,7 @@ func (job *Job) RegisterImage() {
 	}
 	resp, err := job.service.RegisterImage(params)
 
-	job.state = CreatingImage
+	job.state = AMI_CreatingImage
 
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and

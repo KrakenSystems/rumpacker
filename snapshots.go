@@ -16,7 +16,7 @@ func (job *Job) MakeSnapshot() {
 		return
 	}
 
-	job.state = Snapshotting
+	job.state = AMI_Snapshotting
 
 	params := &ec2.CreateSnapshotInput{
 		VolumeId:    aws.String(job.volume), // Required

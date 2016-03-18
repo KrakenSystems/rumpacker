@@ -42,22 +42,22 @@ func (job *Job) checkState() {
 	case Initialised:
 		job.DetachVolume()
 
-	case Detaching:
+	case AMI_Detaching:
 		if job.CheckVolumeState() == "detached" {
 			job.MakeSnapshot()
 		}
 
-	case Snapshotting:
+	case AMI_Snapshotting:
 		if job.CheckSnapshotState() == "completed" {
 			job.RegisterImage()
 		}
 
-	case CreatingImage:
+	case AMI_CreatingImage:
 		if job.CheckImageState() == "available" {
 			job.AttachVolume()
 		}
 
-	case Attaching:
+	case AMI_Attaching:
 		if job.CheckVolumeState() == "attached" {
 			job.state = Done
 		}
