@@ -1,8 +1,6 @@
 package rumpacker
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -49,8 +47,8 @@ func (job *Job) SetState(state JobStatus) {
 	job.state = state
 }
 
-func (job *Job) GetState() {
-	fmt.Printf("Job status: %s\n", job.state.String())
+func (job *Job) GetState() JobStatus {
+	return job.state
 }
 
 func (job *Job) GetImageID() string {

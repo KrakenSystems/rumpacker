@@ -34,7 +34,7 @@ func (job *Job) checkState() {
 
 	if prevState != job.state {
 		prevState = job.state
-		job.log <- fmt.Sprintf("Job state: %s\n", job.state.String())
+		job.log <- fmt.Sprintf("Job state: %s", job.state.String())
 	}
 
 	success := true
