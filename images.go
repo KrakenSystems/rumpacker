@@ -148,5 +148,8 @@ func (job *Job) RegisterImage() bool {
 	job.imageID = *resp.ImageId
 
 	job.log <- fmt.Sprintf("\t> Image ID: %s", job.imageID)
+
+	job.SetState(AMI_CreatingImage)
+
 	return true
 }
