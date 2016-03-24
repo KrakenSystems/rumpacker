@@ -20,7 +20,7 @@ aws_secret_access_key = MY-SECRET-KEY
 
 # Minimal example
 
-```golang
+```go
 import (
     "github.com/ascaliaio/rumpacker/ami"
     . "github.com/ascaliaio/rumpacker/state"
