@@ -55,14 +55,17 @@ func (job *Job) checkState() {
 		}
 
 	case AMI_CreatingImage:
+		// Wait for image to become available, after that, make it public
 		if job.CheckImageState() == "available" {
-			success = job.AttachVolume()
+			success = job.ImageSetPublic()
 		}
 
-	case ISOPrepareAMIVolume:
+	case Attach_AWS_volume:
+		// Intermediary state used only when AWS Volume is not available as a prerequisite
 		success = job.AttachVolume()
 
 	case AMI_Attaching:
+		// Wait for Volume to be attached again, then we're done
 		if job.CheckVolumeState() == "attached" {
 			job.state = Done
 		}

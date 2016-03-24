@@ -139,8 +139,6 @@ func (job *Job) RegisterImage() bool {
 	resp, err := job.service.RegisterImage(params)
 
 	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
 		job.log <- err.Error()
 		return false
 	}
@@ -164,10 +162,9 @@ func (job *Job) ImageSetPublic() bool {
 		ImageId: aws.String(job.imageID), // Required
 		LaunchPermission: &ec2.LaunchPermissionModifications{
 			Add: []*ec2.LaunchPermission{
-				{ // Required
+				{
 					Group: aws.String("all"),
 				},
-				// More values...
 			},
 		},
 		OperationType: aws.String("add"),
@@ -175,13 +172,12 @@ func (job *Job) ImageSetPublic() bool {
 	resp, err := job.service.ModifyImageAttribute(params)
 
 	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
 		job.log <- err.Error()
 		return false
 	}
 
 	job.log <- fmt.Sprintf("Response: %+v", resp)
+	job.SetState(Attach_AWS_volume)
 
 	return true
 }
