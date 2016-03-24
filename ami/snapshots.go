@@ -1,6 +1,7 @@
 package ami
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -9,40 +10,37 @@ import (
 	. "github.com/KrakenSystems/ascalia-utils"
 )
 
-func (job *Job) MakeSnapshot() bool {
+func (job *Job) MakeSnapshot() error {
 	job.dbJob.SetStatus(AMI_Snapshotting)
 
-	state := job.GetVolumeState()
-	if state != "detached" {
-		job.log <- fmt.Sprintf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s", state, job.state.String())
-		return false
+	state, err := job.GetVolumeState()
+	if err != nil {
+		return err
+	} else if state != "detached" {
+		return errors.New(fmt.Sprintf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s", state, job.state.String()))
 	}
 	job.state = AMI_Snapshotting
 
 	params := &ec2.CreateSnapshotInput{
-		VolumeId:    aws.String(job.volume), // Required
-		Description: aws.String("some description lol"),
+		VolumeId:    aws.String(job.volume),
+		Description: aws.String("snapshot description"),
 		DryRun:      aws.Bool(false),
 	}
 	resp, err := job.service.CreateSnapshot(params)
 
 	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		job.log <- err.Error()
-		return false
+		return err
 	}
 
 	job.snapshotID = *resp.SnapshotId
 
 	job.log <- fmt.Sprintf("\t> Snapshot ID: %s", job.snapshotID)
-	return true
+	return nil
 }
 
-func (job *Job) CheckSnapshotState() string {
+func (job *Job) GetSnapshotState() (string, error) {
 	if job.snapshotID == "" {
-		job.log <- "ERROR no snapshot defined!"
-		return ""
+		return "", errors.New("ERROR no snapshot defined!")
 	}
 
 	params := &ec2.DescribeSnapshotsInput{
@@ -54,19 +52,16 @@ func (job *Job) CheckSnapshotState() string {
 	resp, err := job.service.DescribeSnapshots(params)
 
 	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		job.log <- err.Error()
-		return ""
+		return "", err
 	}
 
 	state := *resp.Snapshots[0].State
 	if state == job.snapshotState {
-		return state
+		return state, nil
 	}
 
 	job.snapshotState = state
 	job.log <- fmt.Sprintf("\t> Snapshot in state: %s", state)
 
-	return state
+	return state, nil
 }

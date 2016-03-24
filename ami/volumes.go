@@ -1,6 +1,7 @@
 package ami
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -9,19 +10,7 @@ import (
 	. "github.com/KrakenSystems/ascalia-utils"
 )
 
-func (job *Job) CheckVolumeState() string {
-	state := job.GetVolumeState()
-	if state == job.volumeState {
-		return state
-	}
-
-	job.volumeState = state
-	job.log <- fmt.Sprintf("\t> Volume in state: %s", state)
-
-	return state
-}
-
-func (job *Job) GetVolumeState() string {
+func (job *Job) GetVolumeState() (string, error) {
 	params := &ec2.DescribeVolumesInput{
 		VolumeIds: []*string{
 			aws.String(job.volume),
@@ -30,27 +19,32 @@ func (job *Job) GetVolumeState() string {
 	resp, err := job.service.DescribeVolumes(params)
 
 	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		job.log <- err.Error()
-		return ""
+		return "", err
 	}
 
 	if len(resp.Volumes) != 1 {
-		job.log <- "ERROR: wrong number of returned volumes!"
-		return ""
+		return "", errors.New("ERROR: wrong number of returned volumes!")
 	}
+
+	var state string
 
 	if len(resp.Volumes[0].Attachments) == 0 {
-		return "detached"
+		state = "detached"
+	} else if len(resp.Volumes[0].Attachments) > 1 {
+		state = "multiple"
+	} else {
+		state = *resp.Volumes[0].Attachments[0].State
+
 	}
 
-	if len(resp.Volumes[0].Attachments) > 1 {
-		job.log <- "ERROR: multiple attachments!"
-		return "multiple"
+	if state == job.volumeState {
+		return state, nil
 	}
 
-	return *resp.Volumes[0].Attachments[0].State
+	job.volumeState = state
+	job.log <- fmt.Sprintf("\t> Volume in state: %s", state)
+
+	return state, nil
 }
 
 func (job *Job) ListVolumes() {
@@ -75,18 +69,19 @@ func (job *Job) ListVolumes() {
 	}
 }
 
-func (job *Job) DetachVolume() bool {
+func (job *Job) DetachVolume() error {
 	if job.state != Initialised {
-		job.log <- fmt.Sprintf("ERROR job not in state initialised! Cannot detach! State: %s", job.state.String())
-		return false
+		return errors.New(fmt.Sprintf("ERROR job not in state initialised! Cannot detach! State: %s", job.state.String()))
 	}
 
 	job.dbJob.SetStatus(AMI_Detaching)
 	job.state = AMI_Detaching
 
-	state := job.GetVolumeState()
-	if state == "detached" {
-		return true
+	state, err := job.GetVolumeState()
+	if err != nil {
+		return err
+	} else if state == "detached" {
+		return nil
 	}
 
 	params := &ec2.DetachVolumeInput{
@@ -96,26 +91,24 @@ func (job *Job) DetachVolume() bool {
 	}
 	job.log <- fmt.Sprintf("\t> Detaching %s...", job.volume)
 
-	_, err := job.service.DetachVolume(params)
+	_, err = job.service.DetachVolume(params)
 
 	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		job.log <- err.Error()
-		return false
+		return err
 	}
 
-	return true
+	return nil
 }
 
-func (job *Job) AttachVolume() bool {
+func (job *Job) AttachVolume() error {
 	job.dbJob.SetStatus(AMI_Attaching)
 	job.state = AMI_Attaching
 
-	state := job.GetVolumeState()
-	if state != "detached" {
-		job.log <- fmt.Sprintf("ERROR volume not detached! Cannot attach! Volume state: %s, Job state: %s", state, job.state.String())
-		return false
+	state, err := job.GetVolumeState()
+	if err != nil {
+		return err
+	} else if state != "detached" {
+		return errors.New(fmt.Sprintf("ERROR volume not detached! Cannot attach! Volume state: %s, Job state: %s", state, job.state.String()))
 	}
 
 	params := &ec2.AttachVolumeInput{
@@ -126,14 +119,11 @@ func (job *Job) AttachVolume() bool {
 	}
 	job.log <- fmt.Sprintf("\t> Attaching %s...", job.volume)
 
-	_, err := job.service.AttachVolume(params)
+	_, err = job.service.AttachVolume(params)
 
 	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return false
+		return err
 	}
 
-	return true
+	return nil
 }

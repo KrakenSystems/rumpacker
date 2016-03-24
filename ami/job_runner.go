@@ -37,41 +37,50 @@ func (job *Job) checkState() {
 		job.log <- fmt.Sprintf("Job state: %s", job.state.String())
 	}
 
-	success := true
+	var err error
 
 	switch job.state {
 
 	case Initialised:
-		success = job.DetachVolume()
+		err = job.DetachVolume()
 
 	case AMI_Detaching:
-		if job.CheckVolumeState() == "detached" {
-			success = job.MakeSnapshot()
+		var state string
+		state, err = job.GetVolumeState()
+		if state == "detached" {
+			err = job.MakeSnapshot()
 		}
 
 	case AMI_Snapshotting:
-		if job.CheckSnapshotState() == "completed" {
-			success = job.RegisterImage()
+		var state string
+		state, err = job.GetSnapshotState()
+		if state == "completed" {
+			err = job.RegisterImage()
 		}
 
 	case AMI_CreatingImage:
 		// Wait for image to become available, after that, make it public
-		if job.CheckImageState() == "available" {
-			success = job.ImageSetPublic()
+		var state string
+		state, err = job.GetImageState()
+		if state == "available" {
+			err = job.ImageSetPublic()
 		}
 
 	case Attach_AWS_volume:
 		// Intermediary state used only when AWS Volume is not available as a prerequisite
-		success = job.AttachVolume()
+		err = job.AttachVolume()
 
 	case AMI_Attaching:
 		// Wait for Volume to be attached again, then we're done
-		if job.CheckVolumeState() == "attached" {
+		var state string
+		state, err = job.GetVolumeState()
+		if state == "attached" {
 			job.state = Done
 		}
 	}
 
-	if !success {
+	if err != nil {
+		job.log <- err.Error()
 		job.state = Done
 		job.dbJob.SetStatus(Errored)
 	}

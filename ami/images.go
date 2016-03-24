@@ -1,6 +1,7 @@
 package ami
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -11,67 +12,10 @@ import (
 	_ "github.com/KrakenSystems/ascalia-utils"
 )
 
-func (job *Job) MakeImage() bool {
-
-	job.dbJob.SetStatus(AMI_CreatingImage)
-
-	state := job.GetVolumeState()
-	if state != "detached" {
-		job.log <- fmt.Sprintf("ERROR volume not detached! Cannot image! Volume state: %s, Job state: %s", state, job.state.String())
-		return false
-	}
-	job.state = AMI_CreatingImage
-
-	if job.snapshotID == "" {
-		job.log <- "ERROR no snapshot defined!"
-		return false
-	}
-
-	if job.snapshotState != "completed" {
-		job.log <- "ERROR no snapshot complete!"
-		return false
-	}
-
-	job.imageName = fmt.Sprintf("Image %d", time.Now().Unix())
-	job.log <- fmt.Sprintf("AWS image name: %s", job.imageName)
-
-	params := &ec2.CreateImageInput{
-		InstanceId: aws.String(job.instance),  // Required
-		Name:       aws.String(job.imageName), // Required
-		BlockDeviceMappings: []*ec2.BlockDeviceMapping{
-			{ // Required
-				DeviceName: aws.String("/dev/sda1"),
-				Ebs: &ec2.EbsBlockDevice{
-					DeleteOnTermination: aws.Bool(false),
-					SnapshotId:          aws.String(job.snapshotID),
-					VolumeSize:          aws.Int64(1),
-					VolumeType:          aws.String("standard"),
-				},
-			},
-		},
-		DryRun:   aws.Bool(false),
-		NoReboot: aws.Bool(true),
-	}
-
-	resp, err := job.service.CreateImage(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		job.log <- err.Error()
-		return false
-	}
-
-	job.imageID = *resp.ImageId
-
-	job.log <- fmt.Sprintf("> Image ID: %s", job.imageID)
-	return true
-}
-
-func (job *Job) CheckImageState() string {
+func (job *Job) GetImageState() (string, error) {
 	if job.imageID == "" {
 		job.log <- "ERROR no image defined!"
-		return ""
+		return "", nil
 	}
 
 	params := &ec2.DescribeImagesInput{
@@ -86,32 +30,30 @@ func (job *Job) CheckImageState() string {
 		// Print the error, cast err to awserr.Error to get the Code and
 		// Message from an error.
 		job.log <- err.Error()
-		return ""
+		return "", err
 	}
 
 	state := *resp.Images[0].State
 	if state == job.imageState {
-		return state
+		return state, nil
 	}
 
 	job.imageState = state
 	job.log <- fmt.Sprintf("> Image in state: %s", state)
 
-	return state
+	return state, nil
 }
 
-func (job *Job) RegisterImage() bool {
+func (job *Job) RegisterImage() error {
 	job.dbJob.SetStatus(AMI_RegisteringImage)
 	job.state = AMI_RegisteringImage
 
 	if job.snapshotID == "" {
-		job.log <- "ERROR no snapshot defined!"
-		return false
+		return errors.New("ERROR no snapshot defined!")
 	}
 
 	if job.snapshotState != "completed" {
-		job.log <- "ERROR no snapshot complete!"
-		return false
+		return errors.New("ERROR no snapshot complete!")
 	}
 
 	job.imageName = fmt.Sprintf("Image %d", time.Now().Unix())
@@ -139,8 +81,7 @@ func (job *Job) RegisterImage() bool {
 	resp, err := job.service.RegisterImage(params)
 
 	if err != nil {
-		job.log <- err.Error()
-		return false
+		return err
 	}
 
 	job.imageID = *resp.ImageId
@@ -149,13 +90,12 @@ func (job *Job) RegisterImage() bool {
 
 	job.SetState(AMI_CreatingImage)
 
-	return true
+	return nil
 }
 
-func (job *Job) ImageSetPublic() bool {
+func (job *Job) ImageSetPublic() error {
 	if job.imageID == "" {
-		job.log <- "ERROR no image defined!"
-		return false
+		return errors.New("ERROR no image defined!")
 	}
 
 	params := &ec2.ModifyImageAttributeInput{
@@ -169,15 +109,13 @@ func (job *Job) ImageSetPublic() bool {
 		},
 		OperationType: aws.String("add"),
 	}
-	resp, err := job.service.ModifyImageAttribute(params)
+	_, err := job.service.ModifyImageAttribute(params)
 
 	if err != nil {
-		job.log <- err.Error()
-		return false
+		return err
 	}
 
-	job.log <- fmt.Sprintf("Response: %+v", resp)
 	job.SetState(Attach_AWS_volume)
 
-	return true
+	return nil
 }
