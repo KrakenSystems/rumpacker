@@ -25,7 +25,7 @@ type Job struct {
 	kernelID string
 
 	state JobStatus
-	Done  chan int
+	Wait  chan JobStatus
 
 	dbJob *DatabaseJob
 	log   chan string
@@ -37,7 +37,7 @@ func NewJob(instance string, volume string, kernelID string, dbJob *DatabaseJob,
 		volume:   volume,
 		instance: instance,
 		kernelID: kernelID,
-		Done:     make(chan int),
+		Wait:     make(chan JobStatus),
 		dbJob:    dbJob,
 		log:      log,
 	}

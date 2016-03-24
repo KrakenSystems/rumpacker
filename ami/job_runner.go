@@ -18,13 +18,13 @@ func (job *Job) Run() {
 
 			job.checkState()
 
-			if job.state == Done {
+			if job.state == Done || job.state == Errored {
 				job.log <- "*** Job done! ***"
 				break
 			}
 		}
 
-		job.Done <- 1
+		job.Wait <- job.state
 	}()
 }
 
