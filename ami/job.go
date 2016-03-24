@@ -1,4 +1,4 @@
-package rumpacker
+package ami
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
