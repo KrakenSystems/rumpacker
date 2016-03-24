@@ -81,7 +81,7 @@ func (job *Job) checkState() {
 
 	if err != nil {
 		job.log <- err.Error()
-		job.state = Done
+		job.state = Errored
 		job.dbJob.SetStatus(Errored)
 	}
 }
