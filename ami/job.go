@@ -54,3 +54,7 @@ func (job *Job) GetState() JobStatus {
 func (job *Job) GetImageID() string {
 	return job.imageID
 }
+
+func (job *Job) SetImageID(img string) {
+	job.imageID = img
+}

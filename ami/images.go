@@ -153,3 +153,35 @@ func (job *Job) RegisterImage() bool {
 
 	return true
 }
+
+func (job *Job) ImageSetPublic() bool {
+	if job.imageID == "" {
+		job.log <- "ERROR no image defined!"
+		return false
+	}
+
+	params := &ec2.ModifyImageAttributeInput{
+		ImageId: aws.String(job.imageID), // Required
+		LaunchPermission: &ec2.LaunchPermissionModifications{
+			Add: []*ec2.LaunchPermission{
+				{ // Required
+					Group: aws.String("all"),
+				},
+				// More values...
+			},
+		},
+		OperationType: aws.String("add"),
+	}
+	resp, err := job.service.ModifyImageAttribute(params)
+
+	if err != nil {
+		// Print the error, cast err to awserr.Error to get the Code and
+		// Message from an error.
+		job.log <- err.Error()
+		return false
+	}
+
+	job.log <- fmt.Sprintf("Response: %+v", resp)
+
+	return true
+}
