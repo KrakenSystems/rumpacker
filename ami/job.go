@@ -26,27 +26,24 @@ type Job struct {
 
 	state RumpackerState
 
-	Wait        chan RumpackerState
-	StateChange chan RumpackerState
+	waitChan chan RumpackerState
 
 	log chan string
 }
 
 func NewJob(instance string, volume string, kernelID string, log chan string) *Job {
 	return &Job{
-		service:     ec2.New(session.New(), &aws.Config{Region: aws.String("us-east-1")}),
-		volume:      volume,
-		instance:    instance,
-		kernelID:    kernelID,
-		Wait:        make(chan RumpackerState),
-		StateChange: make(chan RumpackerState),
-		log:         log,
+		service:  ec2.New(session.New(), &aws.Config{Region: aws.String("us-east-1")}),
+		volume:   volume,
+		instance: instance,
+		kernelID: kernelID,
+		waitChan: make(chan RumpackerState),
+		log:      log,
 	}
 }
 
 func (job *Job) SetState(state RumpackerState) {
 	job.state = state
-	job.StateChange <- state
 }
 
 func (job *Job) GetState() RumpackerState {
@@ -59,4 +56,8 @@ func (job *Job) GetImageID() string {
 
 func (job *Job) SetImageID(img string) {
 	job.imageID = img
+}
+
+func (job *Job) WaitJob() RumpackerState {
+	return <-job.waitChan
 }

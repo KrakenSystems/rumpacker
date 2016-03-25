@@ -24,7 +24,7 @@ func (job *Job) Run() {
 			}
 		}
 
-		job.Wait <- job.state
+		job.waitChan <- job.state
 	}()
 }
 
