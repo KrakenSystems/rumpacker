@@ -4,9 +4,9 @@ package state
 
 import "fmt"
 
-const _RumpackerState_name = "InitialisedAMI_DetachingAMI_SnapshottingAMI_CreatingImageAMI_RegisteringImageAMI_AttachingDoneErroredAttach_AWS_volume"
+const _RumpackerState_name = "Rumpacker_InitialisedAMI_DetachingAMI_SnapshottingAMI_CreatingImageAMI_RegisteringImageAMI_AttachingRumpacker_DoneRumpacker_ErroredAttach_AWS_volume"
 
-var _RumpackerState_index = [...]uint8{0, 11, 24, 40, 57, 77, 90, 94, 101, 118}
+var _RumpackerState_index = [...]uint8{0, 21, 34, 50, 67, 87, 100, 114, 131, 148}
 
 func (i RumpackerState) String() string {
 	if i < 0 || i >= RumpackerState(len(_RumpackerState_index)-1) {

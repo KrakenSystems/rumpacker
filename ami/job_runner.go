@@ -18,7 +18,7 @@ func (job *Job) Run() {
 
 			job.checkState()
 
-			if job.state == Done || job.state == Errored {
+			if job.state == Rumpacker_Done || job.state == Rumpacker_Errored {
 				job.log <- "*** Job done! ***"
 				break
 			}
@@ -41,7 +41,7 @@ func (job *Job) checkState() {
 
 	switch job.state {
 
-	case Initialised:
+	case Rumpacker_Initialised:
 		err = job.DetachVolume()
 
 	case AMI_Detaching:
@@ -75,12 +75,12 @@ func (job *Job) checkState() {
 		var state string
 		state, err = job.GetVolumeState()
 		if state == "attached" {
-			job.SetState(Done)
+			job.SetState(Rumpacker_Done)
 		}
 	}
 
 	if err != nil {
 		job.log <- err.Error()
-		job.SetState(Errored)
+		job.SetState(Rumpacker_Errored)
 	}
 }

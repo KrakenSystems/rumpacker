@@ -70,7 +70,7 @@ func (job *Job) ListVolumes() {
 }
 
 func (job *Job) DetachVolume() error {
-	if job.state != Initialised {
+	if job.state != Rumpacker_Initialised {
 		return errors.New(fmt.Sprintf("ERROR job not in state initialised! Cannot detach! State: %s", job.state.String()))
 	}
 
