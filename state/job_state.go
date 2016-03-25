@@ -1,4 +1,4 @@
-package rumpacker
+package state
 
 type JobStatus int
 

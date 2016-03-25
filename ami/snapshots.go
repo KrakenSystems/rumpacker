@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
-	. "github.com/KrakenSystems/rumpacker"
+	. "github.com/KrakenSystems/rumpacker/ami"
 )
 
 func (job *Job) MakeSnapshot() error {

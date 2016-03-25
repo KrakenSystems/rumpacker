@@ -5,7 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
-	. "github.com/KrakenSystems/rumpacker"
+	. "github.com/KrakenSystems/rumpacker/state"
 )
 
 type Job struct {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	. "github.com/KrakenSystems/rumpacker"
+	. "github.com/KrakenSystems/rumpacker/state"
 )
 
 func (job *Job) Run() {
