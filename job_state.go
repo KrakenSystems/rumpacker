@@ -12,14 +12,5 @@ const (
 	AMI_Attaching
 	Done
 	Errored
-	CloningRepo
-	Started
-	BuildingRump
-	BuildingISO
-	BuildingAMI
 	Attach_AWS_volume
-	Building_Jekyll
-	Building_Clay
-	Packing_static_web
-	Generating_ISO_file
 )

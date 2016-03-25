@@ -4,9 +4,9 @@ package rumpacker
 
 import "fmt"
 
-const _JobStatus_name = "InitialisedAMI_DetachingAMI_SnapshottingAMI_CreatingImageAMI_RegisteringImageAMI_AttachingDoneErroredCloningRepoStartedBuildingRumpBuildingISOBuildingAMIAttach_AWS_volumeBuilding_JekyllBuilding_ClayPacking_static_webGenerating_ISO_file"
+const _JobStatus_name = "InitialisedAMI_DetachingAMI_SnapshottingAMI_CreatingImageAMI_RegisteringImageAMI_AttachingDoneErroredAttach_AWS_volume"
 
-var _JobStatus_index = [...]uint8{0, 11, 24, 40, 57, 77, 90, 94, 101, 112, 119, 131, 142, 153, 170, 185, 198, 216, 235}
+var _JobStatus_index = [...]uint8{0, 11, 24, 40, 57, 77, 90, 94, 101, 118}
 
 func (i JobStatus) String() string {
 	if i < 0 || i >= JobStatus(len(_JobStatus_index)-1) {
