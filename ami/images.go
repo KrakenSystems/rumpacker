@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	. "github.com/KrakenSystems/ascalia-utils"
+	. "github.com/KrakenSystems/rumpacker"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )

@@ -5,7 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
-	. "github.com/KrakenSystems/ascalia-utils"
+	. "github.com/KrakenSystems/rumpacker"
 )
 
 type Job struct {

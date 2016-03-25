@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	. "github.com/KrakenSystems/ascalia-utils"
+	. "github.com/KrakenSystems/rumpacker"
 )
 
 func (job *Job) Run() {
