@@ -24,10 +24,10 @@ type Job struct {
 
 	kernelID string
 
-	state JobStatus
+	state RumpackerState
 
-	Wait        chan JobStatus
-	StateChange chan JobStatus
+	Wait        chan RumpackerState
+	StateChange chan RumpackerState
 
 	log chan string
 }
@@ -38,18 +38,18 @@ func NewJob(instance string, volume string, kernelID string, log chan string) *J
 		volume:      volume,
 		instance:    instance,
 		kernelID:    kernelID,
-		Wait:        make(chan JobStatus),
-		StateChange: make(chan JobStatus),
+		Wait:        make(chan RumpackerState),
+		StateChange: make(chan RumpackerState),
 		log:         log,
 	}
 }
 
-func (job *Job) SetState(state JobStatus) {
+func (job *Job) SetState(state RumpackerState) {
 	job.state = state
 	job.StateChange <- state
 }
 
-func (job *Job) GetState() JobStatus {
+func (job *Job) GetState() RumpackerState {
 	return job.state
 }
 

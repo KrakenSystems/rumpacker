@@ -28,7 +28,7 @@ func (job *Job) Run() {
 	}()
 }
 
-var prevState JobStatus
+var prevState RumpackerState
 
 func (job *Job) checkState() {
 

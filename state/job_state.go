@@ -1,10 +1,10 @@
 package state
 
-type JobStatus int
+type RumpackerState int
 
-//go:generate stringer -type=JobStatus
+//go:generate stringer -type=RumpackerState
 const (
-	Initialised JobStatus = iota
+	Initialised RumpackerState = iota
 	AMI_Detaching
 	AMI_Snapshotting
 	AMI_CreatingImage
