@@ -8,8 +8,6 @@ import (
 	. "github.com/KrakenSystems/ascalia-utils"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-
-	_ "github.com/KrakenSystems/ascalia-utils"
 )
 
 func (job *Job) GetImageState() (string, error) {
@@ -45,8 +43,7 @@ func (job *Job) GetImageState() (string, error) {
 }
 
 func (job *Job) RegisterImage() error {
-	job.dbJob.SetStatus(AMI_RegisteringImage)
-	job.state = AMI_RegisteringImage
+	job.SetState(AMI_RegisteringImage)
 
 	if job.snapshotID == "" {
 		return errors.New("ERROR no snapshot defined!")

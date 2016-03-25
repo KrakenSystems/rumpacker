@@ -11,15 +11,14 @@ import (
 )
 
 func (job *Job) MakeSnapshot() error {
-	job.dbJob.SetStatus(AMI_Snapshotting)
+	job.SetState(AMI_Snapshotting)
 
-	state, err := job.GetVolumeState()
+	volumeState, err := job.GetVolumeState()
 	if err != nil {
 		return err
-	} else if state != "detached" {
-		return errors.New(fmt.Sprintf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s", state, job.state.String()))
+	} else if volumeState != "detached" {
+		return errors.New(fmt.Sprintf("ERROR volume not detached! Cannot snapshot! Volume state: %s, Job state: %s", volumeState, job.state.String()))
 	}
-	job.state = AMI_Snapshotting
 
 	params := &ec2.CreateSnapshotInput{
 		VolumeId:    aws.String(job.volume),
@@ -55,13 +54,13 @@ func (job *Job) GetSnapshotState() (string, error) {
 		return "", err
 	}
 
-	state := *resp.Snapshots[0].State
-	if state == job.snapshotState {
-		return state, nil
+	snapshotState := *resp.Snapshots[0].State
+	if snapshotState == job.snapshotState {
+		return snapshotState, nil
 	}
 
-	job.snapshotState = state
-	job.log <- fmt.Sprintf("\t> Snapshot in state: %s", state)
+	job.snapshotState = snapshotState
+	job.log <- fmt.Sprintf("\t> Snapshot in state: %s", snapshotState)
 
-	return state, nil
+	return snapshotState, nil
 }

@@ -25,26 +25,28 @@ type Job struct {
 	kernelID string
 
 	state JobStatus
-	Wait  chan JobStatus
 
-	dbJob *DatabaseJob
-	log   chan string
+	Wait        chan JobStatus
+	StateChange chan JobStatus
+
+	log chan string
 }
 
-func NewJob(instance string, volume string, kernelID string, dbJob *DatabaseJob, log chan string) *Job {
+func NewJob(instance string, volume string, kernelID string, log chan string) *Job {
 	return &Job{
-		service:  ec2.New(session.New(), &aws.Config{Region: aws.String("us-east-1")}),
-		volume:   volume,
-		instance: instance,
-		kernelID: kernelID,
-		Wait:     make(chan JobStatus),
-		dbJob:    dbJob,
-		log:      log,
+		service:     ec2.New(session.New(), &aws.Config{Region: aws.String("us-east-1")}),
+		volume:      volume,
+		instance:    instance,
+		kernelID:    kernelID,
+		Wait:        make(chan JobStatus),
+		StateChange: make(chan JobStatus),
+		log:         log,
 	}
 }
 
 func (job *Job) SetState(state JobStatus) {
 	job.state = state
+	job.StateChange <- state
 }
 
 func (job *Job) GetState() JobStatus {

@@ -26,25 +26,25 @@ func (job *Job) GetVolumeState() (string, error) {
 		return "", errors.New("ERROR: wrong number of returned volumes!")
 	}
 
-	var state string
+	var volumeState string
 
 	if len(resp.Volumes[0].Attachments) == 0 {
-		state = "detached"
+		volumeState = "detached"
 	} else if len(resp.Volumes[0].Attachments) > 1 {
-		state = "multiple"
+		volumeState = "multiple"
 	} else {
-		state = *resp.Volumes[0].Attachments[0].State
+		volumeState = *resp.Volumes[0].Attachments[0].State
 
 	}
 
-	if state == job.volumeState {
-		return state, nil
+	if volumeState == job.volumeState {
+		return volumeState, nil
 	}
 
-	job.volumeState = state
-	job.log <- fmt.Sprintf("\t> Volume in state: %s", state)
+	job.volumeState = volumeState
+	job.log <- fmt.Sprintf("\t> Volume in state: %s", volumeState)
 
-	return state, nil
+	return volumeState, nil
 }
 
 func (job *Job) ListVolumes() {
@@ -74,13 +74,12 @@ func (job *Job) DetachVolume() error {
 		return errors.New(fmt.Sprintf("ERROR job not in state initialised! Cannot detach! State: %s", job.state.String()))
 	}
 
-	job.dbJob.SetStatus(AMI_Detaching)
-	job.state = AMI_Detaching
+	job.SetState(AMI_Detaching)
 
-	state, err := job.GetVolumeState()
+	volumeState, err := job.GetVolumeState()
 	if err != nil {
 		return err
-	} else if state == "detached" {
+	} else if volumeState == "detached" {
 		return nil
 	}
 
@@ -101,8 +100,7 @@ func (job *Job) DetachVolume() error {
 }
 
 func (job *Job) AttachVolume() error {
-	job.dbJob.SetStatus(AMI_Attaching)
-	job.state = AMI_Attaching
+	job.SetState(AMI_Attaching)
 
 	state, err := job.GetVolumeState()
 	if err != nil {

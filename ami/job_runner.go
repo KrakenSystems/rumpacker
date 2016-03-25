@@ -75,13 +75,12 @@ func (job *Job) checkState() {
 		var state string
 		state, err = job.GetVolumeState()
 		if state == "attached" {
-			job.state = Done
+			job.SetState(Done)
 		}
 	}
 
 	if err != nil {
 		job.log <- err.Error()
-		job.state = Errored
-		job.dbJob.SetStatus(Errored)
+		job.SetState(Errored)
 	}
 }
